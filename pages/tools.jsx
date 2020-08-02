@@ -1,9 +1,11 @@
-import React, {useState, useEffect} from 'react'
+import React, {useState, useEffect, useCallback, useRef} from 'react'
 import Head from 'next/head'
 import axios from 'axios';
 
 import styles from '../styles/Tools.module.css'
 import Card from './components/Card';
+import Modal from '@material-ui/core/Modal';
+import Subscribe from './components/Modal/index'
 
 
 let myHeaders = new Headers();
@@ -20,6 +22,16 @@ const Tools = () => {
     const [search, setSearch] = useState('')
     const [list, setList] = useState([])
     const [typingTimeout, setTypingTimeout] = useState(0)
+    const [showModal, setShowModal] = useState(false)
+
+    const handleOpen = () => {
+        setShowModal(true);
+    };
+    
+    const handleClose = () => {
+        setShowModal(false);
+    };
+    
 
     useEffect(() => {
         console.log(search)
@@ -28,7 +40,7 @@ const Tools = () => {
         }
         
         setTypingTimeout(setTimeout(function () {
-            axios.get(`http://127.0.0.1:4001/tools?q=${search}`)
+            axios.get(`http://127.0.0.1:4000/tools?q=${search}`)
                 .then(res => {
                 const data = res.data;
                 setList([...data]);
@@ -37,12 +49,13 @@ const Tools = () => {
     }, [search])
 
     useEffect(() => {
-        axios.get(`http://127.0.0.1:4001/tools`)
+        axios.get(`http://127.0.0.1:4000/tools`)
         .then(res => {
           const data = res.data;
           setList([...data]);
         })
     }, [])
+
 
     return (
         <>
@@ -56,11 +69,26 @@ const Tools = () => {
                 value={search}
                 onChange={e => setSearch(e.target.value)}
                 />
+            <button onClick={() => setShowModal(true)}>+Add</button>
             <ul>
                { list ? list.map((item) => (
                         <Card key={item.id} props={item}/>
                     )): null }
             </ul>
+
+            <Modal
+                open={showModal}
+                onClose={handleClose}
+                aria-labelledby="simple-modal-title"
+                aria-describedby="simple-modal-description"
+            >
+                <>
+                <button onClick={ handleClose}>X</button>
+                    <Subscribe/>
+                </>
+            </Modal>
+            
+
         </>        
     )
 }
